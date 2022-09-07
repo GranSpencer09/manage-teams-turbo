@@ -1,21 +1,33 @@
-ROP DATABASE IF EXISTS registrar_db;
-CREATE DATABASE registrar_db;
+DROP DATABASE IF EXISTS thebestcompany_db;
+CREATE DATABASE thebestcompany_db;
 
-USE registrar_db;
+USE thebestcompany_db;
 
-CREATE TABLE instructors (
-  id INT NOT NULL,
-  first_name VARCHAR(30),
-  last_name VARCHAR(30),
-  PRIMARY KEY (id)
+CREATE TABLE department (
+  id INT NOT NULL PRIMARY KEY,
+  name VARCHAR(30) NOT NULL
 );
 
-CREATE TABLE courses (
-  id INT,
-  course_title VARCHAR(30) NOT NULL,
-  instructor_id INT,
-  order_details TEXT,
-  FOREIGN KEY (instructor_id)
-  REFERENCES instructors(id)
-  ON DELETE SET NULL
+CREATE TABLE role (
+  id INT NOT NULL PRIMARY KEY,
+  title VARCHAR(30) NOT NULL,
+  salary DECIMAL(7,2),
+  department_id INT,
+  FOREIGN KEY (department_id)
+  REFERENCES department(id)
+  ON DELETE cascade
+);
+
+CREATE TABLE employee (
+  id INT NOT NULL PRIMARY KEY,
+  first_name VARCHAR(30) NOT NULL,
+  last_name VARCHAR(30) NOT NULL,
+  role_id INT,
+  manager_id INT,
+  FOREIGN KEY (role_id)
+  REFERENCES role(id)
+  ON DELETE cascade,
+  FOREIGN KEY (manager_id) 
+  REFERENCES employee(id)
+  ON DELETE cascade
 );
