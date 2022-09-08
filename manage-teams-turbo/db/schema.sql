@@ -29,5 +29,5 @@ CREATE TABLE employee (
   ON DELETE cascade,
   FOREIGN KEY (manager_id) 
   REFERENCES employee(id)
-  ON DELETE cascade
+   ON DELETE cascade
 );
