@@ -46,6 +46,8 @@ function start() {
         apiRoles();
       } else if (choice.menu === "view all employees") {
         apiEmployees();
+      } else if (choice.menu === "add a department") {
+        addDep();
       } else {
         return;
       }
@@ -80,7 +82,27 @@ function apiEmployees() {
   );
 }
 
-// express won't see 404 as an error so we have to explicitly say if nothing gets returned above, return a 404 error
+function addDep() {
+  inquirer
+    .prompt([
+      {
+        type: "listinput",
+        name: "addDep",
+        message: "Please enter a name for the new department",
+      },
+    ])
+    .then((choice) => {
+      db.query(
+        "insert into department ( name ) values (?)",
+        choice.addDep,
+        function (err, results) {
+          console.log("Added " + choice.addDep + " to the database");
+          start();
+        }
+      );
+    });
+}
+
 app.use((req, res) => {
   res.status(404).end();
 });
