@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
 const cTable = require("console.table");
+// /require("dotenv").config();
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -18,32 +19,6 @@ const db = mysql.createConnection(
   },
   console.log(`Connected to the books_db database.`)
 );
-
-//async
-function apiDeps() {
-  // Query database
-  db.query("SELECT * FROM department", function (err, results) {
-    console.table(results);
-    start();
-  });
-}
-
-function apiRoles() {
-  // Query database
-  db.query("SELECT * FROM role", function (err, results) {
-    console.table(results);
-    start();
-  });
-}
-
-// express won't see 404 as an error so we have to explicitly say if nothing gets returned above, return a 404 error
-app.use((req, res) => {
-  res.status(404).end();
-});
-
-app.listen(PORT, () => {
-  //console.log(`Server running on port ${PORT}`);
-});
 
 function start() {
   inquirer
@@ -69,11 +44,50 @@ function start() {
         apiDeps();
       } else if (choice.menu === "view all roles") {
         apiRoles();
+      } else if (choice.menu === "view all employees") {
+        apiEmployees();
       } else {
         return;
       }
     });
 }
+
+function apiDeps() {
+  db.query("SELECT * FROM department", function (err, results) {
+    console.table(results);
+    start();
+  });
+}
+
+function apiRoles() {
+  db.query(
+    "SELECT role.title AS Title, role.id AS RoleID, department.name AS Department, role.salary as Salary FROM role INNER JOIN department ON role.department_id = department.id",
+    function (err, results) {
+      console.table(results);
+      start();
+    }
+  );
+}
+
+function apiEmployees() {
+  db.query(
+    "SELECT employee.id AS EmployeeID, employee.first_name AS FirstName, employee.last_name AS LastName, role.title as Title, department.name as Department, role.salary as Salary, employee.manager_id as Manager FROM employee INNER JOIN role ON role.id = employee.id INNER JOIN department ON role.department_id = department.id",
+
+    function (err, results) {
+      console.table(results);
+      start();
+    }
+  );
+}
+
+// express won't see 404 as an error so we have to explicitly say if nothing gets returned above, return a 404 error
+app.use((req, res) => {
+  res.status(404).end();
+});
+
+app.listen(PORT, () => {
+  //console.log(`Server running on port ${PORT}`);
+});
 
 start();
 
