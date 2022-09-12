@@ -14,7 +14,7 @@ const db = mysql.createConnection(
   {
     host: "localhost",
     user: "root",
-    password: "GJUJ66%4#fsU!8rC@F^y#09T",
+    password: "",
     database: "thebestcompany_db",
   },
   console.log(`Connected to the books_db database.`)
@@ -48,6 +48,8 @@ function start() {
         apiEmployees();
       } else if (choice.menu === "add a department") {
         addDep();
+      } else if (choice.menu === "add a role") {
+        addRole();
       } else {
         return;
       }
@@ -93,13 +95,130 @@ function addDep() {
     ])
     .then((choice) => {
       db.query(
-        "insert into department ( name ) values (?)",
+        "insert into department (name) values (?)",
         choice.addDep,
         function (err, results) {
           console.log("Added " + choice.addDep + " to the database");
-          start();
+          apiDeps();
         }
       );
+    });
+}
+
+// not able to add yet
+function addRole() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "roleName",
+        message: "Please enter a name for the new role",
+      },
+      {
+        type: "number",
+        name: "roleSalary",
+        message:
+          "Please enter a salary for the new role. No commas or dollar signs",
+      },
+    ])
+    .then((choice) => {
+      const choices = [choice.roleName, choice.roleSalary];
+
+      db.query("select name, id from department", function (err, results) {
+        const departments = results.map(({ id, name }) => ({
+          name: name,
+          id: id,
+        }));
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              name: "roleDep",
+              message: "Please enter a department for the new role",
+              choices: departments,
+            },
+          ])
+          .then((choice) => {
+            choices.push(choice.roleDep);
+            //console.log(choices); this has all three answers
+            db.query(
+              "insert into role (title, salary, department_id) values (?, ?, ?)",
+              choices,
+              function (err, results) {
+                console.log("Added the new role to " + choice.roleDep);
+                apiRoles();
+              }
+            );
+          });
+      });
+    });
+}
+
+function addEmployee() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "empFName",
+        message: "Please enter a first name for the new employee",
+      },
+      {
+        type: "input",
+        name: "empLName",
+        message: "Please enter a last name for the new employee",
+      },
+    ])
+    .then((choice) => {
+      const choices = [choice.empFName, choice.empLName];
+
+      db.query("select name from role", function (err, results) {
+        const roles = results.map(({ name }) => ({
+          name: name,
+        }));
+
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              name: "empRole",
+              message: "Please enter a role for the new employee",
+              choices: roles,
+            },
+          ])
+          .then((choice) => {
+            choices.push(choice.empRole);
+
+            db.query(
+              "select (concatenate first_name + last_name as name) from employee where manager_id is not null",
+              function (err, results) {
+                const managers = results.map(({ manager_id }) => ({
+                  name: name,
+                }));
+                inquirer
+                  .prompt([
+                    {
+                      type: "list",
+                      name: "empManagers",
+                      message: "Who is the employee's manager",
+                      choices: managers,
+                    },
+                  ])
+                  .then((choice) => {
+                    choices.push(choice.empMangers);
+                    db.query(
+                      "insert into employee (first_name, last_name, role_id, manager_id) values (?, ?, ?, ?)",
+                      choices,
+                      function (err, results) {
+                        console.log("Added the new employee");
+
+                        apiRoles();
+                      }
+                    );
+                  });
+              }
+            );
+          });
+      });
     });
 }
 
