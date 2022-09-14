@@ -34,6 +34,14 @@ class DB {
   addEmployee(employee) {
     return this.db.promise().query("INSERT INTO employee SET ?", employee);
   }
+  updateEmployee(updates) {
+    return this.db
+      .promise()
+      .query("UPDATE employee SET role_id = ? WHERE id = ?", [
+        updates.role_id,
+        updates.id,
+      ]);
+  }
 }
 
 module.exports = new DB(db);

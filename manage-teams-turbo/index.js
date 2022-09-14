@@ -34,6 +34,8 @@ function start() {
         addRole();
       } else if (choice.menu === "add an employee") {
         addEmployee();
+      } else if (choice.menu === "update an employee role") {
+        updateEmployee();
       } else {
         return;
       }
@@ -170,12 +172,43 @@ function addEmployee() {
   });
 }
 
-// function updateEmployee() {
-//   db.apiDeps().then(([result]) => {
-//     const choices = result.map((employee) => ({
-//       name: employee.name,
-//       value: employee.id,
-//     }));
-// }
+function updateEmployee() {
+  db.apiEmployees().then(([result]) => {
+    const employees = result.map((employee) => ({
+      name: `${employee.FirstName} ${employee.LastName}`,
+      value: employee.EmployeeID,
+    }));
+    db.apiRoles().then(([result]) => {
+      const roles = result.map((role) => ({
+        name: role.Title,
+        value: role.RoleID,
+      }));
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "emp_id",
+            message: "Select an employee to update their role",
+            choices: employees,
+          },
+          {
+            type: "list",
+            name: "role_id",
+            message: "Select a role to assign to this employee",
+            choices: roles,
+          },
+        ])
+        .then((answers) => {
+          db.updateEmployee({
+            role_id: answers.role_id,
+            id: answers.emp_id,
+          }).then(() => {
+            console.log(`Employee successfully updated with new role`);
+            start();
+          });
+        });
+    });
+  });
+}
 
 start();
