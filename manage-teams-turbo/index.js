@@ -3,6 +3,12 @@ const cTable = require("console.table");
 const db = require("./db/DB");
 
 function start() {
+    console.log("***********************************");
+    console.log("*                                 *");
+    console.log("*        MANAGE TEAMS TURBO       *");
+    console.log("*                                 *");
+    console.log("***********************************");
+  
   inquirer
     .prompt([
       {
